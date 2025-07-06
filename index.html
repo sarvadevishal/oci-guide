@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Gateway to Indian Travel Documents: A Seamless Application Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chosen Palette: Serene Blue and Warm Neutrals (Background: #f8f9fa, Primary Accent: #007bff, Secondary Accent: #e9f5ff, Text: #333, #0056b3) -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down decision funnel to optimize user flow and reduce cognitive load. It begins with a vibrant Hero Section to immediately engage and state the value proposition. The 'Jurisdiction Finder' is strategically placed as the first interactive element, addressing a common initial roadblock. The core content is then organized into three distinct, tabbed sections (Passport, OCI, E-Visa), allowing users to focus on one pathway at a time. Within each tab, information is presented in collapsible accordion sections (Overview, Step-by-Step, Documents, Fees/Timelines, Notes) to manage density and enable progressive disclosure, enhancing readability and user control. Interactive document checklists are integrated for actionable progress tracking. A 'Comparison' section, featuring a Chart.js visualization and a detailed table, provides a data-driven overview for informed decision-making. Finally, an 'FAQ' section offers quick answers to common queries. This architecture was chosen to mirror a logical decision-making process, from initial orientation to detailed exploration and final comparison, ensuring a high conversion rate through clarity and ease of navigation. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Consular Jurisdictions -> Goal: Prevent user error & streamline initial setup -> Viz/Method: Interactive Dropdown with immediate text display -> Interaction: User selects state, JS dynamically updates consulate/VFS info -> Justification: Directly addresses a critical, early-stage user problem, building trust and accelerating the application journey.
+        - Report Info: Application processes (steps, docs, fees) -> Goal: Inform & Guide through complexity -> Viz/Method: Card-based sections with Accordions and Checklists -> Interaction: Click to expand/collapse details, check items off lists -> Justification: Breaks down overwhelming information into digestible, interactive chunks, providing a sense of control and progress, crucial for complex bureaucratic processes.
+        - Report Info: Comparative data (Timelines, Fees) -> Goal: Facilitate strategic comparison -> Viz/Method: Chart.js Bar Chart & Styled HTML Table -> Interaction: Hover for tooltips on chart, static table for detailed qualitative comparison -> Justification: Offers both a quick visual summary of quantitative differences and a structured qualitative overview, empowering users to make data-informed decisions efficiently.
+        - Report Info: Common questions -> Goal: Address immediate concerns & reduce support queries -> Viz/Method: Accordion-based FAQ section -> Interaction: Click to reveal answers -> Justification: Provides on-demand information without cluttering the main content, enhancing self-service capabilities.
+        - Library/Method: Tailwind CSS for responsive, utility-first styling; Chart.js for dynamic, canvas-based data visualization; Font Awesome for clear, scalable iconography. This combination ensures a modern, performant, and visually appealing application without relying on SVG graphics or complex libraries like Mermaid JS, aligning with performance and maintainability goals.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa; /* Warm Neutral Background */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #0056b3; /* Serene Blue for headings */
+            font-weight: 700;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem; /* Responsive padding */
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* Blue gradient */
+            color: white;
+            padding: 4rem 1rem; /* Increased padding for impact */
+            text-align: center;
+            border-radius: 0.75rem; /* Rounded corners */
+            margin-bottom: 2.5rem; /* Increased margin */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); /* Stronger shadow */
+        }
+        .hero-section h1 {
+            font-size: 2.8rem; /* Larger font */
+            margin-bottom: 0.75rem;
+            color: white; /* White text for contrast */
+            font-weight: 800; /* Extra bold */
+        }
+        .hero-section p {
+            font-size: 1.125rem; /* Slightly larger paragraph */
+            max-width: 50rem; /* Constrain width for readability */
+            margin: 0 auto 1.5rem; /* Centered with bottom margin */
+        }
+        .btn-primary {
+            background-color: #28a745; /* Green for call to action */
+            border-color: #28a745;
+            font-size: 1.1rem;
+            padding: 0.75rem 1.875rem; /* Generous padding */
+            border-radius: 9999px; /* Pill shape */
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block; /* For proper padding */
+            text-decoration: none; /* Remove underline for links */
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background-color: #218838;
+            transform: translateY(-0.1875rem); /* Lift effect on hover */
+        }
+
+        /* Section Headers */
+        .section-heading {
+            font-size: 2.2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 0.625rem;
+            color: #0056b3; /* Serene Blue */
+            font-weight: 700;
+        }
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 5rem; /* Underline width */
+            height: 0.25rem; /* Underline thickness */
+            background-color: #007bff; /* Primary accent blue */
+            border-radius: 0.125rem;
+        }
+
+        /* Card Layout */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 1.25rem; /* Gap between cards */
+            margin-bottom: 2rem;
+        }
+        .custom-card {
+            background-color: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* Soft shadow */
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e0e0e0; /* Subtle border */
+        }
+        .custom-card:hover {
+            transform: translateY(-0.3125rem); /* Lift effect */
+            box-shadow: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+        }
+        .card-header-custom {
+            background-color: #e9f5ff; /* Light blue header */
+            padding: 1.25rem;
+            border-bottom: 1px solid #d1e7ff;
+            display: flex;
+            align-items: center;
+            gap: 0.9375rem;
+        }
+        .card-header-custom h3 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .card-body-custom {
+            padding: 1.25rem;
+        }
+        .icon-large {
+            font-size: 2rem;
+            color: #007bff;
+        }
+        .icon-small {
+            font-size: 1.2rem;
+            margin-right: 0.625rem;
+            color: #007bff;
+        }
+
+        /* Accordion Styling */
+        .accordion-item-custom {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            margin-bottom: 0.625rem;
+            overflow: hidden;
+        }
+        .accordion-button-custom {
+            background-color: #f0f8ff; /* Very light blue */
+            color: #0056b3;
+            font-weight: 600;
+            padding: 0.9375rem 1.25rem;
+            width: 100%;
+            text-align: left;
+            border: none;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Space between text and icon */
+        }
+        .accordion-button-custom:not(.collapsed) {
+            background-color: #e0f0ff; /* Slightly darker on open */
+            color: #004085;
+        }
+        .accordion-button-custom:hover {
+            background-color: #e9f5ff;
+        }
+        .accordion-button-custom .arrow-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-button-custom:not(.collapsed) .arrow-icon {
+            transform: rotate(180deg);
+        }
+        .accordion-content-custom {
+            padding: 1.25rem;
+            background-color: #fff;
+            border-top: 1px solid #dee2e6;
+        }
+        .accordion-content-custom ol, .accordion-content-custom ul {
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+        .accordion-content-custom li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Document Checklists */
+        .document-checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .document-checklist li {
+            margin-bottom: 0.625rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        .document-checklist input[type="checkbox"] {
+            margin-right: 0.625rem;
+            min-width: 1.25rem;
+            min-height: 1.25rem;
+            accent-color: #28a745; /* Green checkbox */
+            cursor: pointer;
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+            margin-top: 0.25rem; /* Align with text */
+        }
+        .document-checklist label {
+            cursor: pointer;
+            flex-grow: 1;
+            transition: color 0.3s ease, text-decoration 0.3s ease;
+        }
+        .document-checklist input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            color: #888; /* Faded color for checked items */
+        }
+
+        /* Alerts */
+        .alert-custom {
+            padding: 0.9375rem 1.25rem;
+            border-radius: 0.5rem;
+            margin-top: 1.25rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-weight: 500;
+        }
+        .alert-info-custom {
+            background-color: #e0f7fa;
+            color: #00796b;
+            border: 1px solid #b2ebf2;
+        }
+        .alert-warning-custom {
+            background-color: #fff3e0;
+            color: #ff6f00;
+            border: 1px solid #ffe0b2;
+        }
+        .alert-danger-custom {
+            background-color: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #ef9a9a;
+        }
+
+        /* Tables */
+        .table-responsive-custom {
+            margin-top: 1.875rem;
+            margin-bottom: 2.5rem;
+            overflow-x: auto; /* Ensure responsiveness for tables */
+        }
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            color: #212529;
+            min-width: 600px; /* Ensure table doesn't get too narrow on small screens */
+        }
+        .table-custom th, .table-custom td {
+            padding: 0.75rem 0.9375rem;
+            vertical-align: top;
+            border: 1px solid #dee2e6; /* Consistent borders */
+        }
+        .table-custom thead th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+            color: #495057;
+            text-align: left;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .table-custom ul {
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        /* Interactive Elements - Jurisdiction Finder */
+        .interactive-section-custom {
+            background-color: #e9f5ff; /* Light blue background */
+            padding: 1.875rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.05);
+            border: 1px solid #d1e7ff;
+        }
+        .form-label-custom {
+            font-weight: 600;
+            margin-bottom: 0.625rem;
+            color: #0056b3;
+            display: block; /* Ensure label takes full width */
+        }
+        .form-select-custom {
+            width: 100%;
+            padding: 0.625rem 0.9375rem;
+            border-radius: 0.3125rem;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-select-custom:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .mt-custom { margin-top: 1rem; }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 40vh; /* Responsive height */
+            max-height: 400px; /* Max height to prevent excessive size */
+            width: 100%;
+            max-width: 800px; /* Max width for readability */
+            margin: 2rem auto; /* Center the chart */
+        }
+
+        /* Tab Buttons */
+        .tab-button {
+            transition: all 0.3s ease;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: #4a5568;
+            border-radius: 0.375rem 0.375rem 0 0; /* Rounded top corners */
+            margin-right: 0.5rem; /* Spacing between tabs */
+        }
+        .tab-button:last-child {
+            margin-right: 0;
+        }
+        .tab-button.active {
+            border-color: #4299e1; /* Blue border for active tab */
+            background-color: #ebf8ff; /* Light blue background for active tab */
+            color: #2c5282; /* Darker blue text for active tab */
+            font-weight: 600;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05); /* Subtle shadow on active tab */
+        }
+        .tab-button:hover:not(.active) {
+            background-color: #f0f4f8; /* Light hover effect */
+        }
+
+        /* Footer */
+        footer {
+            background-color: #2d3748; /* Dark grey footer */
+            color: #a0aec0; /* Light grey text */
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            border-radius: 0.75rem; /* Rounded corners */
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <h1 class="text-white">Your Gateway to Indian Travel Documents</h1>
+            <p class="text-white text-opacity-90">A seamless, expert-reviewed guide to simplify Passport, OCI, and E-Visa applications for your US-born child.</p>
+            <a href="#jurisdiction" class="btn-primary">Start Your Application Journey <i class="fas fa-arrow-right ml-2"></i></a>
+        </header>
+
+        <!-- Jurisdiction Finder Section -->
+        <section id="jurisdiction" class="interactive-section-custom">
+            <h2 class="section-heading text-center mb-6">First Step: Find Your Consular Jurisdiction</h2>
+            <p class="text-gray-700 mb-4 text-center max-w-2xl mx-auto">Submitting your application to the correct jurisdiction is critical to avoid delays. Select your U.S. state of residence below to instantly find your designated Indian Mission and VFS Global Center.</p>
+            <label for="state-selector" class="form-label-custom mb-2">Select Your U.S. State/Territory:</label>
+            <select id="state-selector" class="form-select-custom">
+                <option value="">-- Select Your U.S. State/Territory --</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="CT">Connecticut</option>
+                <option value="DE">Delaware</option>
+                <option value="DC">District of Columbia</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="GU">Guam</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NM">New Mexico</option>
+                <option value="NY">New York</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="PR">Puerto Rico</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="VI">Virgin Islands</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+            </select>
+            <div id="jurisdiction-result" class="alert-custom alert-info-custom mt-custom hidden">
+                <i class="fas fa-info-circle"></i> Your Consular Jurisdiction will appear here.
+            </div>
+        </section>
+
+        <!-- Main Content Tabs -->
+        <main>
+            <h2 class="section-heading">Explore Your Options</h2>
+            <div class="flex justify-center mb-8 border-b border-gray-200">
+                <button data-tab="passport" class="tab-button active text-lg py-3 px-6"><i class="fas fa-passport mr-2"></i>Indian Passport</button>
+                <button data-tab="oci" class="tab-button text-lg py-3 px-6"><i class="fas fa-id-card mr-2"></i>OCI Card</button>
+                <button data-tab="evisa" class="tab-button text-lg py-3 px-6"><i class="fas fa-plane-departure mr-2"></i>E-Visa</button>
+            </div>
+
+            <div id="tab-content">
+                <!-- Passport Content -->
+                <div id="passport-content" class="tab-pane">
+                    <div class="custom-card mb-6">
+                        <div class="card-header-custom">
+                            <i class="fas fa-passport icon-large"></i>
+                            <h3>Indian Passport: The Path to Citizenship</h3>
+                        </div>
+                        <div class="card-body-custom">
+                            <p class="text-gray-700">A baby born in the United States to Indian citizen parents is generally eligible for Indian citizenship by descent under Section 4(1) of the Indian Citizenship Act, 1955. This eligibility is contingent upon the child's birth being registered with an Indian Embassy or Consulate within one year of their birth. This birth registration is a mandatory prerequisite before an application for an Indian passport can be made for the child. If the birth is not registered within this one-year timeframe, the child's eligibility category shifts to "Citizen of India by Registration." This alternative pathway requires specific approval from the Ministry of Home Affairs (MHA) and can result in significantly longer and more complex processing times.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapsePassportStep1">
+                                <span><i class="fas fa-list-ol mr-3 text-blue-500"></i>Step-by-Step Guide</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapsePassportStep1" class="accordion-content-custom hidden">
+                                <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                                    <li><strong>Online Birth Registration with Ministry of Home Affairs (MHA):</strong>
+                                        <ul>
+                                            <li>Begin by visiting the official Ministry of Home Affairs (MHA) website dedicated to Indian Citizenship Online: <a href="https://indiancitizenshiponline.nic.in" target="_blank" class="text-blue-600 hover:underline">indiancitizenshiponline.nic.in</a>.</li>
+                                            <li>On the portal, select the appropriate form for "Registration of birth of a minor child at an Indian Consulate under Section 4(1) of the Citizenship Act, 1955".</li>
+                                            <li>Carefully fill out the online application form using Block/Capital letters. It is critical to ensure that all personal details, including names, address, and date of birth, match exactly as requested. Each application form is designed for one person only.</li>
+                                            <li>Upload a recent passport-size photograph of the applicant. The photograph must be square-shaped, not less than 35x35mm, with a light-colored background, and the face should cover 80% of the photo. It should not be stapled or have any signatures.</li>
+                                            <li>After accurately entering the applicant's details, and both parents' details, click 'Save and Next'. Proceed to upload the required photo and documents.</li>
+                                            <li>Thoroughly review the generated application form in PDF format for correctness and spellings before clicking 'FINAL SUBMIT TO THE MINISTRY'. Once submitted, modifications are generally not permitted, meaning any errors discovered later would necessitate filling out an entirely new application.</li>
+                                            <li>Print the final online-submitted application form. For minors below 5 years, a left thumb impression should be placed in the designated signature box. For minors aged 5 years and above, they must sign the form themselves; parents are explicitly instructed not to sign on behalf of the child in this box. Both parents must also sign on the last page of the application form.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Application for Birth Certificate from Indian Mission/Consulate:</strong>
+                                        <ul>
+                                            <li>Following the successful online submission on the MHA portal, the printed application copy, along with other required supporting documents, must be submitted to the relevant Indian Embassy or Consulate to receive the 'Birth Certificate'. This step is crucial as it formalizes the birth registration with the Indian authorities abroad.</li>
+                                            <li>It is worth noting that some consulates may allow in-person submission for this specific service without a prior appointment, potentially offering same-day processing. This is typically contingent on all required documents being presented in duplicate (original plus a photocopy).</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Online Passport Application via Passport Seva Portal:</strong>
+                                        <ul>
+                                            <li>Next, visit the Passport Seva website, which is operated by the Ministry of External Affairs, Government of India: <a href="https://embassy.passportindia.gov.in" target="_blank" class="text-blue-600 hover:underline">embassy.passportindia.gov.in</a>.</li>
+                                            <li>If this is the first time applying for passport services, parents will need to register and create an account.</li>
+                                            <li>Proceed to fill out the online application form, selecting "Fresh Passport" for a minor. Parents can choose between a "36 pages" booklet or a "60 pages" jumbo booklet, noting that additional charges apply for the latter.</li>
+                                            <li>It is imperative to accurately provide both an Indian and a USA address in the online application form.</li>
+                                            <li>After completing the online form, carefully note down the Application Reference Number (ARN) that is generated. This ARN is a critical identifier that will be required for the subsequent submission to VFS Global.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>VFS Global Application Submission:</strong>
+                                        <ul>
+                                            <li>VFS Global serves as the authorized service provider for all Indian passport applications in the USA. It is an absolute requirement to complete the VFS online registration process *before* sending any physical application documents.</li>
+                                            <li>Organize all required documents precisely according to the VFS Global checklist for "Re-issue with Passport - Minor," which is the relevant checklist for a fresh passport application following birth registration.</li>
+                                            <li>Pay the necessary fees online through the VFS Global website.</li>
+                                            <li>The physical application can typically be submitted either by postal mail or by scheduling an in-person appointment, depending on the specific VFS center's policy for the jurisdiction. For the Washington D.C. jurisdiction, submission is generally restricted to postal mail only. If opting for mail, purchasing VFS courier service is recommended for reliable tracking.</li>
+                                            <li>It is crucial to ensure that the VFS payment receipt number precisely matches the Application Reference Number (ARN) obtained from the Passport Seva portal.</li>
+                                            <li>A common procedural note is to avoid stapling any documents. All photocopies must be full-page and clearly legible to prevent processing delays.</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapsePassportDocs">
+                                <span><i class="fas fa-file-alt mr-3 text-blue-500"></i>Required Documents</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapsePassportDocs" class="accordion-content-custom hidden">
+                                <ul class="document-checklist space-y-2">
+                                    <li><input type="checkbox" id="p_doc1"><label for="p_doc1">Printed & Signed Government Application Form (Original, signed by parents on last page, minor's signature/thumb impression on page 1 and 4)</label></li>
+                                    <li><input type="checkbox" id="p_doc2"><label for="p_doc2">Two recent passport-size color photographs (2x2 inches or 51x51mm, plain white background, full face, no glasses/reflection)</label></li>
+                                    <li><input type="checkbox" id="p_doc3"><label for="p_doc3">Original US Birth Certificate (Original and Notarized Copy, showing parents' names, DOB, nationality)</label></li>
+                                    <li><input type="checkbox" id="p_doc4"><label for="p_doc4">Parents' Indian Passports (Self-attested copies of the first and last pages of both parents' valid Indian passports)</label></li>
+                                    <li><input type="checkbox" id="p_doc5"><label for="p_doc5">Parents' Valid Legal Status in the USA (Notarized color copies: Green Card, valid Visa, EAD, or I-797A approval notice. Include I-797C if extension pending)</label></li>
+                                    <li><input type="checkbox" id="p_doc6"><label for="p_doc6">Proof of Address in the USA (Color Copy, matching application address: State ID, DL, utility bill <3 months, valid Lease Agreement, Mortgage documents, or Income Tax return. P.O. Box not accepted)</label></li>
+                                    <li><input type="checkbox" id="p_doc7"><label for="p_doc7">Marriage Certificate of Parents (Copy, issued by Indian Mission/Post, Foreign Government, Indian authorities, or Foreign Embassy/High Commission/Consulate)</label></li>
+                                    <li><input type="checkbox" id="p_doc8"><label for="p_doc8">Notarized Annexure D (Parental Consent - signed by both parents. If one parent outside country, notarized Annexure D from their location + notarized No Objection Letter)</label></li>
+                                    <li><input type="checkbox" id="p_doc9"><label for="p_doc9">Notarized Annexure C (Single Parent/No Consent - if one parent unable/unwilling to consent)</label></li>
+                                    <li><input type="checkbox" id="p_doc10"><label for="p_doc10">Self-Sworn Affidavits (for Birth Registration - Notarized Copies, joint affidavit from both parents confirming no other nationality and no objection to birth registration/passport issuance)</label></li>
+                                    <li><input type="checkbox" id="p_doc11"><label for="p_doc11">Copy of Online Birth Registration Application (Copy of the form submitted online on the MHA portal)</label></li>
+                                </ul>
+                                <div class="alert-custom alert-warning-custom mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i> **Important Note:** Notarization is frequently required across numerous documents. Ensure notary stamps are clear and valid.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapsePassportFees">
+                                <span><i class="fas fa-dollar-sign mr-3 text-green-500"></i><i class="fas fa-clock mr-3 text-red-500"></i>Fees & Timelines</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapsePassportFees" class="accordion-content-custom hidden">
+                                <p class="text-gray-700"><strong>Fees:</strong></p>
+                                <ul>
+                                    <li><strong>Birth Registration:</strong> US$25.00 + US$2.00 ICWF = <strong>US$27.00</strong> (Typically two separate money orders or cashier's cheques to the respective Consulate General of India. Cash, personal checks, debit/credit cards generally not accepted for this service directly at Consulate).</li>
+                                    <li><strong>Passport Application (Minor, 36 pages, 5-year validity):</strong> US$50.00 (Passport Fee) + US$15.90 (VFS Global service charge) + US$2.00 (ICWF) = <strong>US$67.90</strong>.</li>
+                                    <li><strong>Optional Services:</strong> VFS Global offers form filling (US$19.95), passport photographs (US$7.99 for 4 photos), printing (US$1.00 per page), standard overnight courier (US$18.00). Online payments for these or main application incur an additional 3.5% convenience charge.</li>
+                                    <li><strong>Tatkaal (Emergency) Passport:</strong> Additional US$150.00 (Total: US$217.90).</li>
+                                </ul>
+                                <p class="text-gray-700"><strong>Timelines:</strong></p>
+                                <ul>
+                                    <li><strong>Birth Registration:</strong> 4-5 business days (mail), potentially same-day (in-person at Consulate).</li>
+                                    <li><strong>Passport Application (Normal):</strong> 3-4 business days (excluding VFS Global's processing time), contingent on a clear Police Verification Report (PVR) and all documents in order.</li>
+                                    <li><strong>Passport Application (Complex Cases/Pending PVR):</strong> Can extend to 30 days or more (excluding VFS Global's processing time), dependent on clearance from relevant authorities in India.</li>
+                                    <li><strong>Tatkaal (Emergency):</strong> Approximately 3-5 working days; however, this service is *not guaranteed*.</li>
+                                </ul>
+                                <div class="alert-custom alert-danger-custom mt-2">
+                                    <i class="fas fa-exclamation-triangle"></i>Tatkaal (expedited) service is available but not guaranteed. Processing times are heavily reliant on Police Verification in India; plan travel well in advance and avoid booking non-refundable tickets until the passport is physically received.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapsePassportNotes">
+                                <span><i class="fas fa-lightbulb mr-3 text-yellow-500"></i>Special Notes & Caveats</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapsePassportNotes" class="accordion-content-custom hidden">
+                                <ul>
+                                    <li><strong>Dual Citizenship:</strong> India does not recognize dual citizenship for adults. The child automatically acquires US citizenship by birth. Obtaining an Indian passport implies Indian citizenship, and the child will likely be required to choose between US and Indian citizenship upon reaching adulthood (typically 18 years old).</li>
+                                    <li><strong>Minor's Signature/Thumb Impression:</strong> For minors below 5 years, a left thumb impression must be placed in the designated signature box. For minors aged 5 years and above, they are required to sign the form themselves. Parents are explicitly instructed *not* to sign in the child's signature box on their behalf.</li>
+                                    <li><strong>Photo Specifications for Infants:</strong> While general passport photo rules apply (2x2 inches, white background, color, recent), there are some relaxations for babies and infants regarding facial expression, eye position, and line of sight. However, the child must be the *only* subject in the photograph; no visible support (such as a parent's hands), toys, or other people should be present. For newborns and babies under one year, their eyes may be closed in the photo.</li>
+                                    <li><strong>Incomplete Applications:</strong> Applications lacking any mandatory documents will be placed "on Hold." If deficiencies are not corrected within a specified timeframe (typically 7 days from notification), the application may be returned unprocessed.</li>
+                                    <li><strong>Form Expiry:</strong> Online application forms have a validity period. It is recommended that parents fill a fresh passport application form if their previous one was completed more than 150 days ago, as forms typically expire after 180 days.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCI Content -->
+                <div id="oci-content" class="tab-pane hidden">
+                    <div class="custom-card mb-6">
+                        <div class="card-header-custom">
+                            <i class="fas fa-id-card icon-large"></i>
+                            <h3>OCI Card: Lifelong Visa-Free Travel</h3>
+                        </div>
+                        <div class="card-body-custom">
+                            <p class="text-gray-700">The Overseas Citizen of India (OCI) card serves as a permanent residency status for persons of Indian origin, providing lifelong visa-free travel to India. It offers many benefits that are largely akin to those enjoyed by Non-Resident Indians (NRIs) in financial, economic, and educational sectors. However, it is crucial to understand that OCI status does not confer full Indian citizenship; OCI cardholders do not possess voting rights, cannot hold constitutional posts, and are generally restricted from acquiring agricultural land in India. A minor child whose parents are Indian citizens, or where at least one parent is an Indian citizen, or whose parents were citizens of India at the time of or after January 26, 1950, is eligible to apply for an OCI card.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                         <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapseOciStep1">
+                                <span><i class="fas fa-list-ol mr-3 text-blue-500"></i>Step-by-Step Guide</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseOciStep1" class="accordion-content-custom hidden">
+                                <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                                    <li><strong>Check Eligibility and Prepare Prerequisites:</strong>
+                                        <ul>
+                                            <li>Before starting the application, ensure the minor child meets all specified eligibility criteria, particularly regarding the Indian citizenship or origin of their parents.</li>
+                                            <li>Gather all required supporting documents. These documents must be in PDF format, with a maximum file size of 1000kb. It is absolutely mandatory to upload all required documents onto the Government Portal; applications will be rejected and returned unprocessed if this step is not completed.</li>
+                                            <li>Prepare the applicant's digital image and signature image according to strict specifications:
+                                                <ul>
+                                                    <li><strong>Applicant Photo:</strong> Equal height and width, min 200x200 pixels, max 1500x1500 pixels. Max file size 500kb.</li>
+                                                    <li><strong>Signature Photo:</strong> Aspect ratio 1:3, min 200x67 pixels, max 1500x500 pixels. Max file size 500kb.</li>
+                                                </ul>
+                                            </li>
+                                            <li>For minors below 5 years, a thumb impression is required in place of a signature. For minors aged 5 years and above, they must provide their own signature on the form. Parents are explicitly instructed *not* to sign in the child's signature box.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Online OCI Registration on Government Portal:</strong>
+                                        <ul>
+                                            <li>Navigate to the official OCI Services website: <a href="https://ociservices.gov.in/welcome" target="_blank" class="text-blue-600 hover:underline">ociservices.gov.in/welcome</a>.</li>
+                                            <li>Complete the online application form meticulously. For minor applicants, one parent is permitted to sign the form, and it must be notarized before submission.</li>
+                                            <li>Upload the digital photo and signature that were prepared earlier, ensuring they strictly adhere to the specified dimensions and file size requirements. The physical photograph affixed to the printed application form and the digital photograph uploaded online must be identical.</li>
+                                            <li>After successful online submission, print the application form, which will include an Online Registration Number.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>VFS Global Application Submission:</strong>
+                                        <ul>
+                                            <li>It is mandatory to complete the VFS Global online registration process *before* dispatching the physical application documents.</li>
+                                            <li>Submit the complete physical application form, along with all relevant enclosures and the requisite fees, to the designated VFS India Consular Application Centre within your consular jurisdiction.</li>
+                                            <li>Applications can be sent either by postal process or by booking an appointment for in-person submission, depending on the specific VFS center's operational policies. Processed documents will only be returned via courier service, either using VFS Global's offered courier service or a self-provided pre-paid label (FedEx pre-paid labels are generally not accepted).</li>
+                                            <li>Ensure that the physical application package is sent within 30 days from the date it was initially registered on the VFS system.</li>
+                                            <li>The outer envelope of the application package should be clearly superscribed as “NEW OCI - MINOR,” and each envelope should contain only one application. As a general rule, documents should not be stapled together.</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapseOciDocs">
+                                <span><i class="fas fa-file-alt mr-3 text-blue-500"></i>Required Documents</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseOciDocs" class="accordion-content-custom hidden">
+                                <ul class="document-checklist space-y-2">
+                                    <li><input type="checkbox" id="o_doc1"><label for="o_doc1">OCI Application Form (Printed online form from ociservices.gov.in. For minors, one parent may sign and notarize. Minors under 5 require thumb impression, 5+ must sign. Both parents' signatures on Part B).</label></li>
+                                    <li><input type="checkbox" id="o_doc2"><label for="o_doc2">Photographs & Digital Signature (Two physical passport-size photos 2x2 inches, plain white/light background, dark attire. Digital uploads must precisely match specs).</label></li>
+                                    <li><input type="checkbox" id="o_doc3"><label for="o_doc3">Parental Authorization Form (NOTARIZED, signed by BOTH PARENTS. Signatures must be identical to those on Government Form and passports. Requires copies of parents' ID cards with signatures and child's birth certificate).</label></li>
+                                    <li><input type="checkbox" id="o_doc4"><label for="o_doc4">Applicant's Current US Passport (Photocopy of info page with picture/details, valid for at least 6 months).</label></li>
+                                    <li><input type="checkbox" id="o_doc5"><label for="o_doc5">Applicant's Indian Passport (Copies of first and last two pages, if previously held).</label></li>
+                                    <li><input type="checkbox" id="o_doc6"><label for="o_doc6">Proof of Renunciation (Mandatory if applicant or either parent ever held Indian Passport. Canceled Indian Passport or Renunciation Certificate. If not available, renunciation must be completed *before* OCI application).</label></li>
+                                    <li><input type="checkbox" id="o_doc7"><label for="o_doc7">Parents' Naturalization Certificates (Self-signed copies if parents acquired foreign nationality. If minor naturalized through parents without separate certificate, notarized affidavit from both parents explaining circumstances + parents' naturalization certificates).</label></li>
+                                    <li><input type="checkbox" id="o_doc8"><label for="o_doc8">Consent Letter (Signed copy, authorizing Indian Consulate/Embassy to edit/correct mistakes in OCI Government online form).</label></li>
+                                    <li><input type="checkbox" id="o_doc9"><label for="o_doc9">Parents' Marriage Certificate (Copy).</label></li>
+                                    <li><input type="checkbox" id="o_doc10"><label for="o_doc10">Proof of Address (One of the Parents - Copy, matching application address: State ID, DL, utility bill <3 months, valid Lease Agreement, Mortgage documents, or Income Tax return. P.O. Box not accepted).</label></li>
+                                    <li><input type="checkbox" id="o_doc11"><label for="o_doc11">Parents' Current Passport Information Page (Copies of the first two and last two pages of both parents' valid current passports).</label></li>
+                                    <li><input type="checkbox" id="o_doc12"><label for="o_doc12">Parents' Legal Status in USA (Copies of both parents' valid Visa status in USA for those holding non-USA passports. Include I-797C if visa extension pending).</label></li>
+                                </ul>
+                                <div class="alert-custom alert-danger-custom mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i> **Critical:** All required documents MUST be uploaded to the Government Portal. Failure to comply with this digital upload requirement will result in the application being rejected and returned unprocessed. A common delay is parents needing to complete their own Indian passport renunciation before applying for the child's OCI.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapseOciFees">
+                                <span><i class="fas fa-dollar-sign mr-3 text-green-500"></i><i class="fas fa-clock mr-3 text-red-500"></i>Fees & Timelines</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseOciFees" class="accordion-content-custom hidden">
+                                <p class="text-gray-700"><strong>Fees:</strong></p>
+                                <ul>
+                                    <li><strong>New OCI Card:</strong> US$275.00 (OCI Fee) + US$15.90 (VFS Global service fee) + US$3.00 (Indian Community Welfare Fund) = <strong>US$293.90</strong>.</li>
+                                    <li><strong>Online Payment Convenience Charges:</strong> An additional 3.5% will be applied to the total payment for all online transactions.</li>
+                                    <li><strong>Payment Method:</strong> Payments must be made via Money Order or Banker's Check, payable to "VFS Services (USA) Inc." Personal checks are explicitly not accepted.</li>
+                                </ul>
+                                <p class="text-gray-700"><strong>Timelines:</strong></p>
+                                <ul>
+                                    <li><strong>Normal Processing:</strong> Approximately 5-6 weeks from the date the application is registered at the Consulate (for new OCI based on Indian origin). For re-issuance or updation of OCI Cards, it's usually 6-7 weeks. These timelines are contingent upon receiving the necessary clearance from the Ministry of Home Affairs (MHA) in India.</li>
+                                    <li><strong>Tracking:</strong> Applicants can monitor the status of their OCI application online through the Government of India's OCI Services portal: <a href="https://ociservices.gov.in/statusEnqury" target="_blank" class="text-blue-600 hover:underline">ociservices.gov.in/statusEnqury</a>. VFS Global cannot provide additional updates until the OCI card is physically received back at their office.</li>
+                                </ul>
+                                <div class="alert-custom alert-danger-custom mt-2">
+                                    <i class="fas fa-exclamation-circle"></i>OCI applications **cannot be expedited or processed on an emergency basis**. If urgent travel to India is required while an OCI application is pending, parents are strongly advised to apply for an appropriate visa (such as an e-visa) as an alternative.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapseOCINotes">
+                                <span><i class="fas fa-lightbulb mr-3 text-yellow-500"></i>Special Notes & Caveats</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseOCINotes" class="accordion-content-custom hidden">
+                                <ul>
+                                    <li><strong>Incomplete Applications:</strong> If an OCI application is not fully completed within 20 calendar days after its initial submission to VFS Global, it will be returned unprocessed. If additional documents are requested, they must be submitted within a strict timeframe of 7 calendar days. Failure to provide missing documents may result in the application being stopped, with no refund of fees.</li>
+                                    <li><strong>Jurisdiction:</strong> It is crucial to select the correct Indian Mission based on the applicant's U.S. residence, as submitting to an incorrect jurisdiction will lead to significant delays or outright rejection.</li>
+                                    <li><strong>Digital Uploads are Mandatory:</strong> A critical requirement for OCI applications is the mandatory uploading of all required supporting documents onto the Government portal. Failure to comply will result in rejection.</li>
+                                    <li><strong>Signature Matching:</strong> To avoid processing delays or rejection, the signatures of both parents on the Government OCI application form, their passports, and the Parental Authorization Form must be identical.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E-Visa Content -->
+                <div id="evisa-content" class="tab-pane hidden">
+                    <div class="custom-card mb-6">
+                        <div class="card-header-custom">
+                            <i class="fas fa-plane-departure icon-large"></i>
+                            <h3>E-Visa: Quick & Convenient Short-Term Travel</h3>
+                        </div>
+                        <div class="card-body-custom">
+                            <p class="text-gray-700">The Indian e-visa provides a convenient electronic travel authorization that permits US citizens, including minors, to visit India for specific, short-term purposes. Unlike traditional visas, it does not require an initial physical visa stamp in the passport. The entire application and approval process for the e-visa is conducted online, making it a suitable option for those requiring quick travel authorization.</p>
+                        </div>
+                    </div>
+                     <div class="space-y-4">
+                         <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapseEvisaEligibility">
+                                <span><i class="fas fa-user-check mr-3 text-green-500"></i>Eligibility & Types</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseEvisaEligibility" class="accordion-content-custom hidden">
+                                <p class="text-gray-700"><strong>Eligibility:</strong></p>
+                                <ul>
+                                    <li>The child must possess a valid US passport. This passport must have a minimum validity of six months from the intended date of arrival in India and should contain at least two blank pages for immigration stamping upon arrival.</li>
+                                    <li>The child's travel to India must be for purposes explicitly allowed under the e-visa categories (tourism, sightseeing, casual visits to friends/relatives, short-term yoga, medical treatment, accompanying medical patient).</li>
+                                    <li>The child is required to have a confirmed return or onward ticket and demonstrate sufficient funds to support their stay in India.</li>
+                                    <li>The child should not have a residence or occupation established in India.</li>
+                                </ul>
+                                <p class="text-gray-700"><strong>Types of E-Visas for US Citizen Minors:</strong></p>
+                                <ul>
+                                    <li><strong>e-Tourist Visa (eTV):</strong> For recreational purposes. Typically allows multiple entries. Validity options for 30 days, 1 year, or 5 years.</li>
+                                    <li><strong>e-Medical Visa:</strong> For minors seeking medical treatment in India. Permits triple entries, valid for max 120 days. Requires letter from recognized Indian medical institution.</li>
+                                    <li><strong>e-Medical Attendant Visa:</strong> For individuals accompanying patients. Also allows triple entries, valid up to 120 days. Max two medical attendants per patient.</li>
+                                </ul>
+                            </div>
+                        </div>
+                         <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapseEvisaStep1">
+                                <span><i class="fas fa-list-ol mr-3 text-blue-500"></i>Step-by-Step Guide</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseEvisaStep1" class="accordion-content-custom hidden">
+                                <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                                    <li><strong>Online Application on Official Government Portal:</strong>
+                                        <ul>
+                                            <li>Access the official Government of India e-visa website: <a href="https://indianvisaonline.gov.in/evisa/tvoa.html" target="_blank" class="text-blue-600 hover:underline">indianvisaonline.gov.in/evisa/tvoa.html</a>.</li>
+                                            <li>Select the appropriate e-visa category that matches the minor's purpose of travel.</li>
+                                            <li>Fill out the online India visa application form with all the minor's details, including personal information, passport details, and travel plans. All information must be provided in English. The entire process of filling the application and making payment is estimated to take between 10 to 15 minutes.</li>
+                                            <li>The e-visa process is a "completely online application for which no facilitation is required by any intermediary / agent etc.". Parents must fill it "himself/herself" and take "responsibility for the correctness of information". This implies a higher risk of rejection due to minor errors if parents are not extremely careful.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Upload Required Documents:</strong>
+                                        <ul>
+                                            <li>Upload a recent passport-sized photograph of the minor and a scanned copy of the minor's US passport.</li>
+                                            <li>Any additional supporting documents pertinent to the chosen visa category (e.g., a medical treatment letter for an e-Medical visa) must also be uploaded.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Online Fee Payment:</strong>
+                                        <ul>
+                                            <li>Pay the applicable e-visa fee online using a credit card, debit card, or other accepted online payment methods.</li>
+                                            <li>The fee must be paid at least 4 days prior to the expected date of travel; otherwise, the application will not be processed.</li>
+                                            <li>It is important to note that payment status updates may take up to 2 hours due to technical or network delays. Applicants are advised to wait for this period before attempting to re-apply if the status is not immediately updated.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Receive Electronic Travel Authorization (ETA):</strong>
+                                        <ul>
+                                            <li>Once the application is processed and approved, the e-visa, which is referred to as an Electronic Travel Authorization (ETA), will be sent electronically to the registered email address.</li>
+                                            <li>Parents must print a copy of the ETA and carry it with the child during travel. It is crucial to confirm that the ETA status is shown as 'GRANTED' on the official website before commencing the journey.</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                            <button class="accordion-button-custom collapsed" type="button" data-target="#collapseEvisaDocs">
+                                <span><i class="fas fa-file-alt mr-3 text-blue-500"></i>Required Documents</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseEvisaDocs" class="accordion-content-custom hidden">
+                                 <ul class="document-checklist space-y-2">
+                                    <li><input type="checkbox" id="e_doc1"><label for="e_doc1">Valid US Passport (Scanned Copy, valid for at least six months from intended arrival date, with at least two blank pages for immigration stamping).</label></li>
+                                    <li><input type="checkbox" id="e_doc2"><label for="e_doc2">Recent Color Passport-Sized Photograph of the Minor (Digital: JPEG, 10KB-300KB, min 350x350px, max 1000x1000px, 300 DPI. Physical: 2x2 inches (51x51 mm), plain white/light background, full face, no visible support/objects. For newborns/babies under one year, eyes may be closed).</label></li>
+                                    <li><input type="checkbox" id="e_doc3"><label for="e_doc3">Supporting Documents (based on visa category, e.g., a letter from a recognized medical institution in India for e-Medical visa).</label></li>
+                                    <li><input type="checkbox" id="e_doc4"><label for="e_doc4">Minor's Birth Certificate Copy (or any other government-issued document clearly showing parents' names, child's date of birth, and nationality. For US citizens, only birth certificates are typically accepted).</label></li>
+                                    <li><input type="checkbox" id="e_doc5"><label for="e_doc5">Parents' Passport Copies (Copies of the vital page(s) containing the picture and signature of both parents' signed passports).</label></li>
+                                    <li><input type="checkbox" id="e_doc6"><label for="e_doc6">Parental Consent (For minor applicants, both parents' signatures on the second page only - minors do not sign page 2. This page must be duly notarized with a notary stamp and seal. Additionally, a separate notarized Parental Authorization Form for Minors is also required).</label></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapseEvisaFees">
+                                <span><i class="fas fa-dollar-sign mr-3 text-green-500"></i><i class="fas fa-clock mr-3 text-red-500"></i>Fees & Timelines</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseEvisaFees" class="accordion-content-custom hidden">
+                               <p class="text-gray-700"><strong>Fees (for US Citizens):</strong></p>
+                                <ul>
+                                    <li><strong>30-day e-Tourist Visa:</strong> US$25.00 (for applications submitted between July and March), and US$10.00 (for applications submitted between April and June).</li>
+                                    <li><strong>One-year e-Tourist Visa:</strong> US$40.00.</li>
+                                    <li><strong>Five-year e-Tourist Visa:</strong> US$80.00.</li>
+                                    <li><strong>e-Medical Visa:</strong> US$80.00.</li>
+                                    <li><strong>Bank Transaction Charges:</strong> An additional 2.5% will be charged on top of the applicable e-visa fees.</li>
+                                </ul>
+                                <p class="text-gray-700"><strong>Timelines:</strong></p>
+                                <ul>
+                                    <li><strong>Normal Processing:</strong> Typically within 3 to 5 business days.</li>
+                                    <li><strong>Urgent Processing:</strong> An expedited processing option may be available for those who require faster turnaround times.</li>
+                                    <li>Applications can be submitted online a minimum of 4 days in advance of the expected date of arrival. For e-Medical and e-Medical Attendant visas, the application window extends up to 120 days in advance of travel.</li>
+                                </ul>
+                                <div class="alert-custom alert-info-custom mt-2">
+                                    <i class="fas fa-check-circle"></i>This is the fastest option available for travel authorization.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item-custom">
+                             <button class="accordion-button-custom collapsed" type="button" data-target="#collapseEvisaNotes">
+                                <span><i class="fas fa-lightbulb mr-3 text-yellow-500"></i>Limitations & Special Notes</span>
+                                <i class="fas fa-chevron-down arrow-icon"></i>
+                            </button>
+                            <div id="collapseEvisaNotes" class="accordion-content-custom hidden">
+                                <ul>
+                                    <li><strong>No Dual Citizenship Endorsement:</strong> E-visas are not available for individuals whose details are endorsed on a parent's or spouse's passport. Each individual, including a minor, must possess their own separate passport to apply for an e-visa.</li>
+                                    <li><strong>Purpose of Travel:</strong> E-visas are strictly for specific purposes, such as tourism, medical treatment, business, or conference attendance. They are generally not intended for establishing residency or employment in India.</li>
+                                    <li><strong>Non-Extendable/Non-Convertible:</strong> E-Tourist Visas are typically non-extendable and cannot be converted to other visa types once issued. This is a crucial limitation for parents considering longer stays or potential changes in their travel purpose.</li>
+                                    <li><strong>Designated Entry Ports:</strong> Travelers holding an e-visa must arrive in India through specific designated international airports or seaports that are equipped to process e-visas.</li>
+                                    <li><strong>Pakistani Origin:</strong> International travelers who hold a Pakistani Passport or are of Pakistani origin are not eligible for an e-visa. They must apply for a regular visa through an Indian Mission.</li>
+                                    <li><strong>Diplomatic/Official Passports:</strong> The e-visa facility is not available for holders of Diplomatic or Official Passports, nor for those holding Laissez-passer travel documents.</li>
+                                    <li><strong>Carry Old Passport:</strong> If the e-visa was granted on an old passport that has since been replaced, the traveler must carry both the new, valid passport and the old passport (on which the e-visa was granted) when entering India.</li>
+                                    <li><strong>Caution Against Fraudulent Websites:</strong> Applicants are strongly advised to use only the official Government of India portal (<a href="https://indianvisaonline.gov.in/evisa/tvoa.html" target="_blank" class="text-blue-600 hover:underline">indianvisaonline.gov.in/evisa/tvoa.html</a>) for e-visa applications. They should exercise extreme caution regarding fraudulent websites that may appear to offer e-visa services. The Embassy or Consulate does not process e-visas and cannot assist with inquiries related to applications submitted through unofficial portals.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Comparison Section -->
+        <section id="comparison" class="mt-16">
+            <h2 class="section-heading">At-a-Glance Comparison</h2>
+            <p class="text-gray-700 max-w-2xl mx-auto text-center mb-6">Visually compare the key decision factors to choose the best option for your family's travel needs and long-term goals.</p>
+            
+            <div class="custom-card p-6">
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                <div class="table-responsive-custom mt-8">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Indian Passport</th>
+                                <th>OCI Card</th>
+                                <th>E-Visa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Citizenship</td>
+                                <td><span class="font-bold text-green-600">Full Indian Citizenship</span></td>
+                                <td>Retain US Citizenship</td>
+                                <td>Retain US Citizenship</td>
+                            </tr>
+                            <tr>
+                                <td>Best For</td>
+                                <td>Permanent move to India</td>
+                                <td>Frequent, long-term visits</td>
+                                <td>Short, urgent, or planned trips</td>
+                            </tr>
+                             <tr>
+                                <td>Dual Citizenship</td>
+                                <td><span class="font-bold text-red-600">Not allowed for adults</span> (must choose at 18)</td>
+                                <td>Allowed</td>
+                                <td>Allowed</td>
+                            </tr>
+                            <tr>
+                                <td>Expedited?</td>
+                                <td>Yes (Tatkaal, not guaranteed)</td>
+                                <td><span class="font-bold text-red-600">No</span></td>
+                                <td>Yes (Urgent processing available)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="mt-16">
+            <h2 class="section-heading">Frequently Asked Questions</h2>
+            <div class="space-y-4 max-w-4xl mx-auto">
+                 <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse1">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q1: Can my US-born baby hold both US and Indian citizenship?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse1" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">No, India does not permit dual citizenship for adults. A baby born in the U.S. automatically acquires US citizenship. If an Indian passport is obtained for the child, they will be considered an Indian citizen. Upon reaching adulthood (typically 18 years old), the individual will generally be required to choose between their US and Indian citizenship. The OCI card is specifically designed for persons of Indian origin who wish to retain their foreign citizenship while benefiting from lifelong visa-free access to India.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse2">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q2: Is birth registration mandatory before applying for an Indian passport for my US-born child?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse2" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">Yes, it is mandatory to register the birth of a child born outside India to Indian parents with the Ministry of Home Affairs (MHA) and the respective Indian Embassy/Consulate. Registering the birth within one year of the child's birth makes them eligible for Indian citizenship by descent. If registration is delayed beyond one year, the child's eligibility shifts to citizenship by registration, which necessitates MHA approval and can significantly prolong the process.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse3">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q3: How long does it typically take to get an Indian passport or OCI card for a minor?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse3" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">For an Indian passport, normal processing typically takes about 3-4 business days (excluding VFS Global's processing time), provided the Police Verification Report (PVR) is clear and all documents are in order. However, if the PVR is pending or in complex cases, processing can extend to 30 days or more. For a new OCI card, normal processing is approximately 5-6 weeks from the date of application registration at the Consulate, and 6-7 weeks for re-issuance or updation. It is important to note that OCI applications *cannot* be expedited.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse4">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q4: Can I travel to India with my baby on an e-visa if their OCI application is pending?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse4" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">Yes, if urgent travel to India is necessary and the OCI application is still pending, parents can apply for an appropriate e-visa (e.g., e-Tourist or e-Medical) for their US-born baby. E-visas are generally processed much faster, typically within 3-5 business days.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse5">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q5: What are the photo requirements for my baby's application?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse5" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">For all applications (Indian passport, OCI card, and e-visa), photographs must be 2x2 inches (51x51mm) with a plain white background and must have been taken within the last six months. The child's full face should be visible, with eyes open. An exception applies to newborns and babies under one year, whose eyes may be closed. Crucially, there must be no visible support (e.g., a parent's hands) or objects (toys, pacifiers) in the photo; the child must be the only subject.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse6">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q6: Do both parents need to sign the application forms for a minor?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse6" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">Yes, for both Indian passport and OCI applications, consent from both parents is generally required. This is often provided through specific notarized forms, such as Annexure D for passports or the Parental Authorization Form for OCI. Additionally, both parents' signatures are required on certain pages of the online application forms.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse7">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q7: What if my application is incomplete or has errors?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse7" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">Incomplete applications or those with discrepancies will be placed "on hold" or returned unprocessed. For applications submitted via VFS Global, parents typically have a limited window (e.g., 7 days for missing documents, 20 days for initial incompleteness) to rectify any deficiencies. Online e-visa applications, once submitted, generally cannot be modified, which means a new application would be required if errors are found. It is important to note that fees are often non-refundable if applications are rejected due to errors.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse8">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q8: What is VFS Global's role?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse8" class="accordion-content-custom hidden">
+                       <p class="text-gray-700">VFS Global is the official outsourced service provider for the Embassy of India and its Consulates General across the USA for passport, OCI, and renunciation services. The majority of these applications are submitted through VFS Global, either by mail or through a scheduled in-person appointment, rather than directly to the Embassy or Consulate. VFS Global's responsibilities include collecting documents, performing initial checks, collecting fees, and dispatching applications to the respective Indian Mission for processing.</p>
+                    </div>
+                </div>
+                <div class="accordion-item-custom">
+                    <button class="accordion-button-custom collapsed" type="button" data-target="#faqCollapse9">
+                        <span><i class="fas fa-question-circle icon-small"></i> Q9: Where can I find the most up-to-date information?</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div id="faqCollapse9" class="accordion-content-custom hidden">
+                        <p class="text-gray-700">To ensure access to the most current forms, checklists, fees, and instructions, parents should always refer to the official websites:</p>
+                        <ul>
+                            <li>Embassy of India, Washington D.C.: <a href="https://www.indianembassyusa.gov.in/" target="_blank" class="text-blue-600 hover:underline">indianembassyusa.gov.in</a></li>
+                            <li>VFS Global for India in USA (Passport, OCI, Renunciation): <a href="https://services.vfsglobal.com/usa/en/ind/" target="_blank" class="text-blue-600 hover:underline">services.vfsglobal.com/usa/en/ind</a></li>
+                            <li>Ministry of Home Affairs (Indian Citizenship Online): <a href="https://indiancitizenshiponline.nic.in/" target="_blank" class="text-blue-600 hover:underline">indiancitizenshiponline.nic.in</a></li>
+                            <li>Government of India e-Visa Portal: <a href="https://indianvisaonline.gov.in/evisa/tvoa.html" target="_blank" class="text-blue-600 hover:underline">indianvisaonline.gov.in/evisa/tvoa.html</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="text-center py-6 mt-12 bg-gray-800 text-gray-400">
+        <p>This interactive guide is for informational purposes only. Information is current as of July 2025.</p>
+        <p>Always verify details with official sources: VFS Global and the Indian Embassy/Consulate.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stateJurisdictions = {
+                "AL": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "FL": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "GA": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "MS": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "PR": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "SC": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "TN": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+                "VI": { consulate: "Consulate General of India, Atlanta", vfs: "VFS Global Atlanta Centre: Suite 175, 1200 Altmore Avenue, Sandy Springs, GA 30342." },
+
+                "CT": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "ME": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "MA": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "NH": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "NJ": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "NY": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "OH": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "PA": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "RI": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+                "VT": { consulate: "Consulate General of India, New York", vfs: "VFS Global New York Centre: 128 E 32nd St Floor 2, New York, NY 10016." },
+
+                "IL": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "IN": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "IA": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "MI": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "MN": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "MO": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "ND": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "SD": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+                "WI": { consulate: "Consulate General of India, Chicago", vfs: "VFS Global Chicago Centre: Suite 2075, 180 North Stetson Ave, 20th Floor, Chicago- 60601." },
+
+                "AR": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "CO": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "KS": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "LA": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "NE": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." }, // Note: Nebraska also listed under San Francisco (Seattle) in some sources. Users should verify.
+                "NM": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "OK": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+                "TX": { consulate: "Consulate General of India, Houston", vfs: "VFS Global Houston Centre: Suite 550, 1001 Texas Avenue, Houston TX 77002." },
+
+                "AK": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+                "AZ": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "CA": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "GU": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "HI": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "ID": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+                "MT": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+                "NV": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "OR": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+                "UT": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA." },
+                "WA": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+                "WY": { consulate: "Consulate General of India, San Francisco", vfs: "VFS Global San Francisco Centre: 642 Harrison Street, Suite 200, San Francisco 94107, CA. Note: Some states like Alaska, Idaho, Montana, Nebraska, North Dakota, Oregon, South Dakota, Washington, and Wyoming are also served by the Consulate General of India, Seattle. Always verify on the VFS Global website for your specific address." },
+
+                "BM": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "DE": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "DC": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "KY": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "MD": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "NC": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "VA": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." },
+                "WV": { consulate: "Embassy of India, Washington, D.C.", vfs: "VFS Global Washington DC Centre: 1025 Vermont Ave, NW, Suite 302, Washington, DC 20005." }
+            };
+
+            const stateSelector = document.getElementById('state-selector');
+            const jurisdictionResult = document.getElementById('jurisdiction-result');
+            
+            Object.keys(stateJurisdictions).forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state; // Display state abbreviation
+                stateSelector.appendChild(option);
+            });
+            
+            stateSelector.addEventListener('change', function() {
+                const selectedState = this.value;
+                if (selectedState && stateJurisdictions[selectedState]) {
+                    const { consulate, vfs } = stateJurisdictions[selectedState];
+                    jurisdictionResult.innerHTML = `Your application should be submitted to the <strong>${consulate}</strong>. <br>${vfs} Please verify the exact VFS Global center on their official website.`;
+                    jurisdictionResult.classList.remove('hidden');
+                } else {
+                    jurisdictionResult.classList.add('hidden');
+                }
+            });
+
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const target = tab.getAttribute('data-tab');
+                    tabPanes.forEach(pane => {
+                        if (pane.id === `${target}-content`) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const accordions = document.querySelectorAll('.accordion-button-custom');
+            accordions.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    const content = document.querySelector(targetId);
+                    
+                    if (content) {
+                        const isHidden = content.classList.contains('hidden');
+                        if (isHidden) {
+                            content.classList.remove('hidden');
+                            button.classList.remove('collapsed');
+                        } else {
+                            content.classList.add('hidden');
+                            button.classList.add('collapsed');
+                        }
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Indian Passport', 'OCI Card', 'E-Visa'],
+                    datasets: [{
+                        label: 'Avg. Processing Time (Weeks)',
+                        data: [1.5, 6, 0.7], // Avg weeks
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)', /* Blue for time */
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Approx. Cost (USD)',
+                        data: [95, 294, 40], // Example average cost
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)', /* Teal for cost */
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Processing Time vs. Cost Comparison',
+                            font: { size: 18, weight: 'bold' },
+                            color: '#333'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.label.includes('Time')) {
+                                        label += context.parsed.y + ' weeks';
+                                    } else {
+                                        label += '$' + context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            },
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            bodyFont: { size: 14 },
+                            titleFont: { size: 14, weight: 'bold' },
+                            padding: 10,
+                            cornerRadius: 6
+                        },
+                        legend: {
+                            labels: {
+                                font: { size: 14 },
+                                color: '#555'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Value (Weeks / USD)',
+                                font: { size: 14, weight: 'bold' },
+                                color: '#555'
+                            },
+                            ticks: {
+                                font: { size: 12 },
+                                color: '#777'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 12, weight: 'bold' },
+                                color: '#555'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
